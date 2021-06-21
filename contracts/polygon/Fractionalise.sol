@@ -4,7 +4,7 @@ pragma solidity ^0.8.3;
 import "./Helper.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract SmartContract is Helper, ERC20 {
+contract FractionaliseContract is Helper, ERC20 {
     constructor () ERC20("SimpleToken", "SIM") {
         _mint(_msgSender(), 10000 * (10 ** uint256(decimals())));
     }
@@ -13,63 +13,7 @@ contract SmartContract is Helper, ERC20 {
 
         emit Transfer(_from, _to, _price);
     }
-    function getFractionaliseInfo (string memory _tokenSymbol) external view returns (FractionaliseStructure memory) {
-        return FractionaliseData[_tokenSymbol];
-    }
-
-    function getSellingOffers (string memory _tokenSymbol) external view returns (SellingOfferStructure[] memory) {
-        return GetSellingOffers(_tokenSymbol);
-    }
-   
-    function getBuyingOffers (string memory _tokenSymbol) external view returns (BuyingOfferStructure[] memory) {
-        return GetBuyingOffers(_tokenSymbol);
-    }
-   
-    function getUserOffers (address _address) external view returns (OutputStructure memory) {
-       return GetUsersOffers(_address);
-    }
-
-    function fractionalise (FractionaliseStructure memory _fractionalise) external  
-        onlyOwnerOf(_fractionalise.OwnerAddress) returns (OutputStructure memory) {
-        return FractionaliseToken (_fractionalise);
-    }
-
-    function newBuyOrder (BuyingOfferStructure memory _buyingOffer) external 
-        onlyOwnerOf(_buyingOffer.BAddress) returns(OutputStructure memory) {
-        return NewBuyOrder(_buyingOffer);
-    }
-
-    function deleteBuyOrder(DeleteOrderRequest memory _buyingOffer) external onlyOwnerOf(_buyingOffer.RequestAddress) 
-     returns(OutputStructure memory) {
-        return DeleteBuyOrder(_buyingOffer);
-    }
-
-    function newSellOrder (SellingOfferStructure memory _sellingOffer) external onlyOwnerOf(_sellingOffer.SAddress)
-        returns (OutputStructure memory) {
-        return NewSellOrder(_sellingOffer);
-    }
-
-    function deleteSellOrder (DeleteOrderRequest memory _sellingOffer) external onlyOwnerOf(_sellingOffer.RequestAddress) 
-     returns(OutputStructure memory) {
-        return DeleteSellOrder(_sellingOffer);
-    }
-   
-    function buyFraction (BuyFractionRequestStructure memory _buyFractionRequest) external onlyOwnerOf(_buyFractionRequest.BuyerAddress) 
-     returns(OutputStructure memory) {
-        return BuyFraction(_buyFractionRequest);
-    }
-    
-    function sellFraction (SellFractionRequestStructure memory _sellFractionRequest) external onlyOwnerOf(_sellFractionRequest.SellerAddress) 
-     returns(OutputStructure memory) {
-        return SellFraction(_sellFractionRequest);
-    }
-    
-    function buyFractionalisedBack (BuyBackRequestStructure memory _buyBackRequest) external onlyOwnerOf(_buyBackRequest.Address) 
-     returns(OutputStructure memory) {
-        return BuyFractionalisedBack(_buyBackRequest);
-    }
-    
-    function FractionaliseToken(FractionaliseStructure memory _input) private returns (OutputStructure memory) {
+    function FractionaliseToken(FractionaliseStructure memory _input) internal returns (OutputStructure memory) {
         OutputStructure memory output;
         address addr = address(uint160(uint(keccak256(abi.encodePacked(block.timestamp, blockhash(block.number))))));
 
@@ -102,7 +46,7 @@ contract SmartContract is Helper, ERC20 {
         return output;
     }
 
-    function NewBuyOrder(BuyingOfferStructure memory _buyingOffer) private returns(OutputStructure memory) {
+    function NewBuyOrder(BuyingOfferStructure memory _buyingOffer) internal returns(OutputStructure memory) {
         OutputStructure memory output;
         _buyingOffer.OrderId = GetTxID();
         TransferStructure memory transfer = TransferStructure ({
@@ -124,7 +68,7 @@ contract SmartContract is Helper, ERC20 {
         return output;
     }
 
-    function NewSellOrder(SellingOfferStructure memory _sellingOffer) private returns (OutputStructure memory) {
+    function NewSellOrder(SellingOfferStructure memory _sellingOffer) internal returns (OutputStructure memory) {
         OutputStructure memory output;
         FractionaliseStructure memory _fractionalise = FractionaliseData[_sellingOffer.TokenSymbol];
 
@@ -149,7 +93,7 @@ contract SmartContract is Helper, ERC20 {
         return output;
     }
 
-    function DeleteBuyOrder(DeleteOrderRequest memory _request) private returns (OutputStructure memory) {
+    function DeleteBuyOrder(DeleteOrderRequest memory _request) internal returns (OutputStructure memory) {
         BuyingOfferStructure memory offer;
         offer.TokenSymbol = _request.TokenSymbol;
         offer.BAddress = _request.RequestAddress;
@@ -196,7 +140,7 @@ contract SmartContract is Helper, ERC20 {
         return output;
     }
 
-    function DeleteSellOrder(DeleteOrderRequest memory _request) private returns(OutputStructure memory) {
+    function DeleteSellOrder(DeleteOrderRequest memory _request) internal returns(OutputStructure memory) {
         SellingOfferStructure memory offer;
         offer.TokenSymbol = _request.TokenSymbol;
         offer.SAddress = _request.RequestAddress;
@@ -242,7 +186,7 @@ contract SmartContract is Helper, ERC20 {
         return output;
     }
 
-    function BuyFraction(BuyFractionRequestStructure memory _buyFractionRequest) private returns(OutputStructure memory) {
+    function BuyFraction(BuyFractionRequestStructure memory _buyFractionRequest) internal returns(OutputStructure memory) {
         SellingOfferStructure memory offer;
         
         offer.OrderId = _buyFractionRequest.OrderId;
@@ -306,7 +250,7 @@ contract SmartContract is Helper, ERC20 {
         return output;
     }
     
-    function SellFraction(SellFractionRequestStructure memory _sellFractionRequest) private returns (OutputStructure memory) {
+    function SellFraction(SellFractionRequestStructure memory _sellFractionRequest) internal returns (OutputStructure memory) {
         BuyingOfferStructure memory offer;
         offer.OrderId = _sellFractionRequest.OrderId;
         offer.TokenSymbol = _sellFractionRequest.TokenSymbol;
@@ -374,7 +318,7 @@ contract SmartContract is Helper, ERC20 {
         return output;
     }
 
-    function BuyFractionalisedBack(BuyBackRequestStructure memory _input) private returns(OutputStructure memory) {
+    function BuyFractionalisedBack(BuyBackRequestStructure memory _input) internal returns(OutputStructure memory) {
         FractionaliseStructure memory _fractionalise = FractionaliseData[_input.TokenSymbol];
         SellingOfferStructure memory sellOffer = SellingOfferData[_fractionalise.FuningToken];
         _transfer( sellOffer.SAddress,  _input.Address, _input.TokenSymbol, sellOffer.Price);
