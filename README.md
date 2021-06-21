@@ -48,26 +48,21 @@ $ truffle unbox polygon
 
 ### Using the env File
 
-You will need at least one mnemonic to use with the network. The `.dotenv` npm package has been installed for you, and you will need to create a `.env` file for storing your mnemonic and any other needed private information.
+The `.secret` file is ignored by git in this project, to help protect your private data. In general, it is good security practice to avoid committing information about your private keys to github. The `truffle-config.js` file expects a `MNEMONIC` value to exist in `.secret` for running migrations on the networks listed in `truffle-config.js`.
 
-The `.env` file is ignored by git in this project, to help protect your private data. In general, it is good security practice to avoid committing information about your private keys to github. The `truffle-config.polygon.js` file expects a `MNEMONIC` value to exist in `.env` for running migrations on the networks listed in `truffle-config.polygon.js`.
+If you are unfamiliar with using `.secret` for managing your mnemonics and other keys, the basic steps for doing so are below:
 
-If you are unfamiliar with using `.env` for managing your mnemonics and other keys, the basic steps for doing so are below:
-
-1) Use `touch .env` in the command line to create a `.env` file at the root of your project.
-2) Open the `.env` file in your preferred IDE
-3) Add the following, filling in your own mnemonic and Infura project key:
+1) Use `touch .secret` in the command line to create a `.secret` file at the root of your project.
+2) Open the `.secret` file in your preferred IDE
+3) Add the following, filling in your own mnemonic:
 
 ```
-MNEMONIC="<Your Mnemonic>"
-INFURA_PROJECT_ID="<Your Infura Project ID>"
+"<Your Mnemonic>"
 ```
-
-4) As you develop your project, you can put any other sensitive information in this file. You can access it from other files with `require('dotenv').config()` and refer to the variable you need with `process.env['<YOUR_VARIABLE>']`.
 
 ### New Configuration File
 
-A new configuration file exists in this project: `truffle-config.polygon.js`. This file contains a reference to the new file location of the `contracts_build_directory` for Polygon PoS contracts and lists several networks that are running the Polygon PoS Layer 2 network instance (see [below](#migrating)).
+A new configuration file exists in this project: `truffle-config.js`. This file contains a reference to the new file location of the `contracts_build_directory` for Polygon PoS contracts and lists several networks that are running the Polygon PoS Layer 2 network instance (see [below](#migrating)).
 
 Please note, the classic `truffle-config.js` configuration file is included here as well, because you will eventually want to deploy contracts to Ethereum as well. All normal truffle commands (`truffle compile`, `truffle migrate`, etc.) will use this config file and save built files to `build/ethereum-contracts`. You can save Solidity contracts that you wish to deploy to Ethereum in the `contracts/ethereum` folder.
 
